@@ -1,0 +1,18 @@
+Unfortunately non of the programs have really useful helpfiles...
+
+Few essential points:
+
+* When using "siglscope" click to graph axis and zoom in/out with mouse wheel.
+
+* Command without output:
+* ./usbtmc_command --device=/dev/usbtmc0 --command ARM
+
+* Query with output:
+* ./usbtmc_command --device=/dev/usbtmc0 '*IDN?'
+
+* Download wave:
+* ./accwave_siglentsds1000 --device=/dev/usbtmc0 --channel=1 > wave.csv
+
+* Download wave and calculate spectrum:
+* ./accspectrum_siglentsds1000 --device=/dev/usbtmc0 --channel=1 > spectrum.csv
+
