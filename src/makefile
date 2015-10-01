@@ -23,3 +23,5 @@ siglscope:
 	/usr/lib64/qt5/bin/qmake -makefile -o Makefile.qt SiglScope.pro
 	make -f Makefile.qt
 
+install:
+	cp usbtmc_command accwave_siglentsds1000 accspectrum_siglentsds1000 siglscope ~/bin

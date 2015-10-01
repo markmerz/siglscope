@@ -1,0 +1,11 @@
+#!/usr/bin/Rscript
+
+system("usbtmc_command -c stop")
+system("accspectrum_siglentsds1000 --channel=1 > /tmp/spectrum.csv")
+system("usbtmc_command -c run")
+wave <- read.csv("/tmp/spectrum.csv",sep = ";")
+png(filename = "/tmp/spectrum.png", width = 1575, height = 768, units = "px")
+plot(wave, type="l")
+dev.off()
+system("eog /tmp/spectrum.png&")
+

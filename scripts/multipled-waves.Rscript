@@ -1,0 +1,13 @@
+#!/usr/bin/Rscript
+
+system("usbtmc_command -c stop")
+system("accwave_siglentsds1000 --channel=1 > /tmp/ch1.csv")
+system("accwave_siglentsds1000 --channel=2 > /tmp/ch2.csv")
+wave1 <- read.csv("/tmp/ch1.csv",sep = ";")
+wave2 <- read.csv("/tmp/ch2.csv",sep = ";")
+multiplied <- data.frame(t=wave1["t.s."], m=wave1["U.V."] * wave2["U.V."])
+png(filename = "/tmp/multiplied.png", width = 1575, height = 768, units = "px")
+plot(multiplied, type="l")
+dev.off()
+system("eog /tmp/multiplied.png&")
+
