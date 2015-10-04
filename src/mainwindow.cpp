@@ -395,7 +395,7 @@ void MainWindow::customButtonClicked() {
 
             drawGraph(waveLabel, wave.getSpectrum());
             ui->customPlot->xAxis->setLabel("Hz");
-            ui->customPlot->yAxis->setLabel("dBV");
+            ui->customPlot->yAxis->setLabel("dBVrms");
             ui->customPlot->replot();
         } else if (buttonlabel == "Spect CH2") {
             QString waveCommand = "C2:WF? ALL";
@@ -420,7 +420,7 @@ void MainWindow::customButtonClicked() {
 
             drawGraph(waveLabel, wave.getSpectrum());
             ui->customPlot->xAxis->setLabel("Hz");
-            ui->customPlot->yAxis->setLabel("dBV");
+            ui->customPlot->yAxis->setLabel("dBVrms");
             ui->customPlot->replot();
         } else {
             this->ui->statusBar->showMessage("BUG!: unknow button???...", 0);

@@ -183,9 +183,7 @@ void Wave::calculateSpectrum() {
 
         for (int c = 0; c < output_size; c++) {
 
-            // double amplitude = 10 * log10((sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2))));
-            // double amplitude = 10 * log10(abs( *output_buffer[c] ));
-            double amplitude = sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2));
+            double amplitude = 2 * sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2)) / window_len;
 
             if (firstpass) {
                 averaged_results[c] = amplitude;
