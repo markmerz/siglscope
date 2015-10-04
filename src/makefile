@@ -20,7 +20,7 @@ clean:
 	$(CC) $(CCFLAGS) -c $<
 
 siglscope:
-	/usr/lib64/qt5/bin/qmake -makefile -o Makefile.qt SiglScope.pro
+	/usr/lib64/qt5/bin/qmake -makefile -o Makefile.qt SiglScope.pro -r -spec linux-g++ CONFIG+=release
 	make -f Makefile.qt
 
 install:

@@ -133,47 +133,88 @@ std::string Wave::getWaveCSV() {
     return ss.str();
 }
 
-void Wave::calculateSpectrum(void) {
-    int wave_len = this->wave->size();
-    int output_size = (wave_len / 2 + 1);
-    double* input_buffer = fftw_alloc_real(wave_len);
-    fftw_complex* output_buffer = fftw_alloc_complex(output_size);
-    int flags = FFTW_ESTIMATE;
 
-    fftw_plan plan = fftw_plan_dft_r2c_1d(wave_len, input_buffer, output_buffer, flags);
+void Wave::calculateSpectrum() {
 
-    for (int c = 0; c < wave_len; c++) {        
-        input_buffer[c] = this->wave->at(c).DATAPOINT;
-    }
-
-    fftw_execute(plan);
+#define WAVE_WINDOW_FRACTION 10
 
     if (this->spectrum == NULL) {
         this->spectrum = new std::vector<std::pair<double,double>>();
     } else {
         this->spectrum->clear();
     }
-    
-    double sample_fulltime = this->wave->back().TIMEPOINT - this->wave->front().TIMEPOINT;
-    
-    double nyquist_freq = (1 / (sample_fulltime / wave_len)) / 2;
+
+
+
+    int wave_len = this->wave->size();
+    int window_len = this->wave->size() / WAVE_WINDOW_FRACTION;
+    int window_step = window_len / 2;
+    int windows_count = wave_len / window_step - 1;
+    int output_size = window_len / 2 + 1;
+
+
+    double averaged_results[output_size];
+    bool firstpass = true;
+
+    double sample_fulltime = (this->wave->back().TIMEPOINT - this->wave->front().TIMEPOINT) / WAVE_WINDOW_FRACTION;
+    double nyquist_freq = (1 / (sample_fulltime / window_len)) / 2;
     double freq_granule = nyquist_freq / output_size;
-    
+
+    double window[window_len];
+    for(int i = 0; i < window_len; i++) {
+        window[i] = 0.54 - (0.46 * cos( 2 * M_PI * (i / ((window_len - 1) * 1.0))));
+    }
+
+
+
+    double* input_buffer = fftw_alloc_real(window_len);
+    fftw_complex* output_buffer = fftw_alloc_complex(output_size);
+    int flags = FFTW_ESTIMATE;
+    fftw_plan plan = fftw_plan_dft_r2c_1d(window_len, input_buffer, output_buffer, flags);
+
+    int window_pos = 0;
+    while (window_pos < windows_count) {
+        int prefix = window_pos * window_step;
+        for (int c = 0; c < window_len; c++) {
+            input_buffer[c] = wave->at(prefix + c).DATAPOINT * window[c];
+        }
+
+        fftw_execute(plan);
+
+        for (int c = 0; c < output_size; c++) {
+
+            // double amplitude = 10 * log10((sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2))));
+            // double amplitude = 10 * log10(abs( *output_buffer[c] ));
+            double amplitude = sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2));
+
+            if (firstpass) {
+                averaged_results[c] = amplitude;
+            } else {
+                averaged_results[c] = averaged_results[c] + amplitude;
+            }
+
+        }
+        firstpass = false;
+        window_pos++;
+    }
+
     for (int c = 0; c < output_size; c++) {
-       
-        double amplitude = 10 * log10((sqrt(pow(output_buffer[c][0], 2) + pow(output_buffer[c][1], 2))));
-        // double amplitude = 10 * log10(abs( *output_buffer[c] ));
+        double amplitude = 10 * log10(averaged_results[c] / windows_count);
+
         double freq = freq_granule * c;
-       
+
         std::pair<double, double> pair;
         pair.DATAPOINT = amplitude;
         pair.FREQPOINT = freq;
         this->spectrum->push_back(pair);
     }
 
+
     fftw_free(input_buffer);
     fftw_free(output_buffer);
     fftw_destroy_plan(plan);
+
+
 }
 
 std::string Wave::getSpectrumCSV() {
